@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">    
+    <title>Exploration Interactive de New York</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script src="nyccv.geojson" type="text/javascript"></script>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f8ff;
+        }
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            max-width: 800px; /* Limite la largeur à celle de la section témoignage */
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .content {
+            max-width: 800px;
+            margin: 20px;
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .popup-image {
+            width: 200px;
+            height: auto;
+            display: block;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .testimonials {
+            margin-top: 40px;
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .testimonial {
+            margin-bottom: 20px;
+            font-style: italic;
+            position: relative;
+            padding-left: 60px; /* Ajoute de l'espace pour l'image */
+        }
+        .testimonial img {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50px; /* Ajustez la taille de l'image */
+            height: auto;
+            border-radius: 50%; /* Pour une image ronde */
+        }
+        .borough-images {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap; /* Pour s'assurer que les images se placent correctement */
+        }
+        .borough-images img {
+            width: 150px; /* Ajustez la taille des images */
+            height: auto;
+            margin: 10px; /* Espacement entre les images */
+            border-radius: 5px; /* Coins arrondis pour les images */
+        }
+    </style>
+
+</head>
+<body>
+
+<header>
+    <h1>Exploration Interactive de New York</h1>
+    <p>Explorez les boroughs de New York à travers une carte interactive, des images captivantes et des témoignages.</p>
+</header>
+
+<div id="map"></div> <!-- The map container -->
+
+<div class="content">
+    <h2>À propos de New York</h2>
+    <p>New York City, la ville qui ne dort jamais, est un véritable carrefour culturel et économique. De ses célèbres gratte-ciels à ses quartiers historiques, il y a tant à découvrir.</p>
+    
+    <h2>Témoignages</h2>
+    <div class="testimonials">
+        <div class="testimonial">
+            <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Jean">
+            "Une expérience incroyable à New York, chaque borough a son propre charme!" - Jean
+        </div>
+        <div class="testimonial">
+            <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="Marie">
+            "J'ai adoré découvrir les cultures différentes dans cette ville." - Marie
+        </div>
+        <div class="testimonial">
+            <img src="https://randomuser.me/api/portraits/men/3.jpg" alt="Pierre">
+            "New York est vraiment unique, il faut y aller au moins une fois dans sa vie!" - Pierre
+        </div>
+    </div>
+    
+    <h3>Comment utiliser la carte</h3>
+    <p>Cliquez sur les marqueurs sur la carte pour découvrir des images et écouter des sons qui représentent chaque borough. Amusez-vous à explorer !</p>
+
+    <!-- Section des images des boroughs -->
+    <div class="borough-images">
+        <img src="https://tse2.mm.bing.net/th?id=OIP.UfePWawp31kzwUqSvSrZFgHaE7&pid=Api&P=0&h=180" alt="Brooklyn">
+        <img src="https://tse2.mm.bing.net/th?id=OIP.xODduUdlwGpS38BZCRV-yQHaFO&pid=Api&P=0&h=180" alt="Manhattan">
+        <img src="https://tse2.mm.bing.net/th?id=OIP.jUOwUDDynRfr9xY2-A5i2AHaEc&pid=Api&P=0&h=180" alt="Queens">
+        <img src="https://encrypted-tbn3.gstatic.com/licensed-image?q=tbn:ANd9GcTpdWoJfdkjkfu1P295z_Aa1exVBDWF3Y9XO4-JHpgeB-gQ8CWnmrwYTzN98Icpiq6kRo1SD4_JfoC6v-COPn0uOiIqzeTO1XDKNOGRVQ" alt="Bronx">
+        <img src="https://tse4.mm.bing.net/th?id=OIP.c90dOi7MbccfWy5bWZ-NngHaFJ&pid=Api&P=0&h=180" alt="Staten Island">
+    </div>
+</div>
+
+<script>
+    const map = L.map('map').setView([40.7128, -74.0060], 12); // Centered on New York
+
+    // Adding the base tile layer from OpenStreetMap
+    const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // Photos and sounds data associated with boroughs
+    const mediaData = {
+        "Brooklyn": {
+            "photo": "https://tse2.mm.bing.net/th?id=OIP.UfePWawp31kzwUqSvSrZFgHaE7&pid=Api&P=0&h=180", // Photo of Brooklyn
+            "sound": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" // Example audio file
+        },
+        "Manhattan": {
+            "photo": "https://tse2.mm.bing.net/th?id=OIP.xODduUdlwGpS38BZCRV-yQHaFO&pid=Api&P=0&h=180", // Photo of Manhattan
+            "sound": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" // Example audio file
+        },
+        "Queens": {
+            "photo": "https://tse2.mm.bing.net/th?id=OIP.jUOwUDDynRfr9xY2-A5i2AHaEc&pid=Api&P=0&h=180", // Photo of Queens
+            "sound": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" // Example audio file for Queens
+        },
+        "The Bronx": {
+            "photo": "https://encrypted-tbn3.gstatic.com/licensed-image?q=tbn:ANd9GcTpdWoJfdkjkfu1P295z_Aa1exVBDWF3Y9XO4-JHpgeB-gQ8CWnmrwYTzN98Icpiq6kRo1SD4_JfoC6v-COPn0uOiIqzeTO1XDKNOGRVQ", // Photo of Bronx
+            "sound": "https://www.allformusic.fr/albums/b513fcd4-5fb3-4d9d-8c42-f881667fa47c" // Example audio file for Bronx
+        },
+        "Staten Island": {
+            "photo": "https://tse4.mm.bing.net/th?id=OIP.c90dOi7MbccfWy5bWZ-NngHaFJ&pid=Api&P=0&h=180", // Photo of Staten Island
+            "sound": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" // Example audio file for Staten Island
+        }
+    };
+
+    // Define colors for each borough
+    const boroughColors = {
+        "Brooklyn": "#FF0000", // Red
+        "Manhattan": "#FFFF00", // Yellow
+        "Queens": "#0000FF",    // Blue
+        "Bronx": "#00FF00",     // Green (corrected to match the key)
+        "Staten Island": "#FF00FF" // Magenta
+    };
+    
+    const boroughCoordinates = {
+        "Brooklyn": [40.6782, -73.9442],
+        "Manhattan": [40.7831, -73.9712],
+        "Queens": [40.7282, -73.7949],
+        "Bronx": [40.8448, -73.8648],
+        "Staten Island": [40.5795, -74.1502]
+    };
+
+    // Store sound instances to manage them
+    const soundInstances = {};
+
+    for (const borough in boroughCoordinates) {
+        const coords = boroughCoordinates[borough];
+        // Create a custom marker with a pointing finger image
+        const customMarker = L.divIcon({
+            className: 'custom-marker',
+            html: `<img src="https://static.vecteezy.com/system/resources/thumbnails/021/996/806/small/hand-cursor-icon-clip-art-free-png.png" style="width:30px; height:30px;">`, // Image URL
+            iconSize: [30, 30], // Adjust size as needed
+            iconAnchor: [15, 30] // Anchor point
+        });
+        
+        L.marker(coords, { icon: customMarker })
+            .addTo(map)
+            .bindPopup(`<strong>${borough}</strong><br>Cliquez dans la zone pour visualiser une image et écouter un son correspondant.`)
+            .openPopup(); // Ouvre le popup par défaut
+    }
+
+    // Function to style each borough
+    function styleFeature(feature) {
+        const borough = feature.properties.BORONAME;
+        return {
+            fillColor: boroughColors[borough] || "#FFFFFF", // Default to white if borough not found
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7
+        };
+    }
+
+    // Add the GeoJSON data to the map
+    L.geoJSON(chef, {
+        style: styleFeature, // Apply the style function
+        onEachFeature: function (feature, layer) {
+            const borough = feature.properties.BORONAME; // Get borough name from GeoJSON
+            const media = mediaData[borough]; // Find media data for this borough
+
+            if (media) {
+                // Create popup content with photo and sound button
+                const popupContent = `
+                    <strong>${borough}</strong><br>
+                    <img src="${media.photo}" alt="Photo of ${borough}" class="popup-image"><br>
+                    <button id="playSound-${borough}" style="margin-top:10px;">Play Sound</button>
+                    <button id="pauseSound-${borough}" style="margin-top:10px;">Pause Sound</button>
+                `;
+
+                layer.bindPopup(popupContent); // Bind the popup with the photo
+
+                layer.on('popupopen', function() {
+                    const playButton = document.getElementById(`playSound-${borough}`);
+                    const pauseButton = document.getElementById(`pauseSound-${borough}`);
+                    
+                    // Remove any previous event listeners to avoid duplicates
+                    playButton.onclick = null; // Clear previous click events
+                    pauseButton.onclick = null; // Clear previous click events
+
+                    // Initialize sound instance
+                    const sound = new Howl({
+                        src: [media.sound],
+                        html5: true, // Enable HTML5 Audio for compatibility
+                        onend: function() {
+                            delete soundInstances[borough]; // Clean up when sound ends
+                        }
+                    });
+
+                    // Play sound on button click
+                    playButton.addEventListener('click', function() {
+                        sound.play(); // Play the sound
+                        soundInstances[borough] = sound; // Store the sound instance
+                    });
+
+                    // Pause sound on button click
+                    pauseButton.addEventListener('click', function() {
+                        if (soundInstances[borough]) {
+                            soundInstances[borough].pause(); // Pause the sound
+                        }
+                    });
+                });
+            }
+        }
+    }).addTo(map);
+    
+</script>
+
+</body>
+</html>
